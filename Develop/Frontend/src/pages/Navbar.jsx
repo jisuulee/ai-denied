@@ -35,6 +35,17 @@ const Navbar = () => {
     }
   };
 
+  // 로그아웃 처리 함수
+  const handleLogout = () => {
+    localStorage.removeItem("nickname");
+    localStorage.removeItem("profile");
+    // 필요한 경우 추가적인 인증 토큰 등을 이곳에서 제거합니다.
+    
+    // 로그아웃 후 메인 페이지로 이동하며 페이지를 새로고침하여 상태를 반영합니다.
+    navigate("/");
+    window.location.reload();
+  };
+
   if (isFirstVisit === null) return null;
 
   return (
@@ -72,13 +83,18 @@ const Navbar = () => {
 
           {/* 로그인 여부에 따른 조건부 렌더링 */}
           {nickname ? (
-            <div className="user-profile-info">
-              {profile && (
-                <img src={profile} alt="profile" className="nav-profile-img" />
-              )}
-              <span className="nav-nickname">
-                <strong>{nickname}</strong> 님
-              </span>
+            <div className="user-profile-wrapper">
+              <div className="user-profile-info">
+                {profile && (
+                  <img src={profile} alt="profile" className="nav-profile-img" />
+                )}
+                <span className="nav-nickname">
+                  <strong>{nickname}</strong> 님
+                </span>
+              </div>
+              <button className="nav-item logout-btn" onClick={handleLogout}>
+                로그아웃
+              </button>
             </div>
           ) : (
             <button
