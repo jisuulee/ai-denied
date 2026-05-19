@@ -19,7 +19,7 @@ spec:
         zone: backend
       containers:
       - name: backend
-        image: agami-captcha.cloud:8443/agami/backend:v1
+        image: agami-captcha.cloud:8443/agami/backend:latest
         imagePullPolicy: Always
         ports:
         - containerPort: 8000
@@ -69,7 +69,7 @@ spec:
         zone: frontend
       containers:
       - name: frontend
-        image: agami-captcha.cloud:8443/agami/frontend:v1
+        image: agami-captcha.cloud:8443/agami/frontend:latest
         imagePullPolicy: Always
         ports:
         - containerPort: 80
