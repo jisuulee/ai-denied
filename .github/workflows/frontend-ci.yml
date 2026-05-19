@@ -1,5 +1,4 @@
-name: Frontend CI/CD
-
+name: Frontend CI
 on:
   push:
     branches: [ "main" ]
@@ -9,7 +8,7 @@ on:
   workflow_dispatch: 
 
 jobs:
-  build-and-deploy:
+  build:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -39,16 +38,3 @@ jobs:
           tags: ${{ secrets.HARBOR_URL }}/agami/frontend:latest
           cache-from: type=gha
           cache-to: type=gha,mode=max
-
-      # K3s 서버에 접속하여 프론트엔드 매니페스트만 적용 및 재시작
-      - name: Deploy to K3s Cluster
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USERNAME }}
-          key: ${{ secrets.SSH_KEY }}
-          script: |
-            cd /path/to/your/repository/Develop/K3s/manifests
-            git pull origin main
-            kubectl apply -f frontend-deployment.yaml
-            kubectl rollout restart deployment/agami-frontend
