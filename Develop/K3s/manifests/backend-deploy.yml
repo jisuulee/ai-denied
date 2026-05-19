@@ -1,0 +1,48 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: agami-backend
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: agami-backend
+  template:
+    metadata:
+      labels:
+        app: agami-backend
+    spec:
+      nodeSelector:
+        zone: backend
+      containers:
+      - name: backend
+        image: agami-captcha.cloud:8443/agami/backend:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8000
+        env:
+        - name: DB_HOST
+          value: "postgres-db-postgresql"
+        - name: DB_PORT
+          value: "5432"
+        - name: DB_USER
+          value: "admin"
+        - name: DB_PASSWORD
+          value: "admin1234"
+        - name: DB_NAME
+          value: "agamidb"
+        - name: KAKAO_REDIRECT_URI
+          value: "https://agami-captcha.cloud/auth/kakao/callback"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: agami-backend-svc
+  namespace: default
+spec:
+  selector:
+    app: agami-backend
+  ports:
+    - port: 80
+      targetPort: 8000
