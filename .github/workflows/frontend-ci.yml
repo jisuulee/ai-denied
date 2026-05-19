@@ -8,17 +8,17 @@ on:
   workflow_dispatch: 
 
 jobs:
-  build:
+  build-and-deploy:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GH_TOKEN }} # workflow 권한이 있는 토큰 필요
 
-      # [수정] 1. HTTPS 하버 통신을 위해 최신 빌더(Buildx) 세팅 (구형 jq/HTTP 설정 제거)
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      # [수정] 2. 공식 Action을 사용하여 안전하게 하버 로그인
       - name: Login to Harbor
         uses: docker/login-action@v3
         with:
@@ -26,13 +26,10 @@ jobs:
           username: ${{ secrets.HARBOR_USERNAME }}
           password: ${{ secrets.HARBOR_PASSWORD }}
 
-      # 3. Secrets 내용을 기반으로 .env 파일 생성 및 확인
       - name: Create .env file for Frontend
         run: |
           echo "${{ secrets.FRONTEND_ENV }}" > ./Develop/Frontend/.env
-          ls -al ./Develop/Frontend/.env
 
-      # 4. 이미지 빌드 및 푸시
       - name: Build and Push
         uses: docker/build-push-action@v5
         with:
@@ -42,3 +39,16 @@ jobs:
           tags: ${{ secrets.HARBOR_URL }}/agami/frontend:v1
           cache-from: type=gha
           cache-to: type=gha,mode=max
+
+      # [핵심 추가] 매니페스트 업데이트로 ArgoCD 트리거
+      - name: Update manifest to trigger ArgoCD
+        run: |
+          # 파일 마지막에 배포 시간을 주석으로 달아 변경 사항 발생 시킴
+          sed -i "/# Last Deploy:/d" ./Develop/K3s/manifests/total-deploy.yml
+          echo "# Last Deploy: $(date +'%Y-%m-%d %H:%M:%S')" >> ./Develop/K3s/manifests/total-deploy.yml
+          
+          git config --global user.name "github-actions"
+          git config --global user.email "actions@github.com"
+          git add ./Develop/K3s/manifests/total-deploy.yml
+          git commit -m "chore: trigger deployment by updating manifest [skip ci]"
+          git push
