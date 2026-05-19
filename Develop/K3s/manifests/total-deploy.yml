@@ -19,7 +19,7 @@ spec:
         zone: backend
       containers:
       - name: backend
-        image: agami-captcha.cloud:8443/agami/backend:latest
+        image: agami-captcha.cloud:8443/agami/backend:v1
         imagePullPolicy: Always
         # [교정] 컨테이너가 켜질 땐 오직 DB를 안정적으로 대기하고 기동하도록 변경 (pip 제거)
         command: ["/bin/sh", "-c"]
@@ -76,7 +76,7 @@ spec:
         zone: frontend
       containers:
       - name: frontend
-        image: agami-captcha.cloud:8443/agami/frontend:latest
+        image: agami-captcha.cloud:8443/agami/frontend:v1
         imagePullPolicy: Always
         ports:
         - containerPort: 80
